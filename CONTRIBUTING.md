@@ -6,16 +6,26 @@
 2. Реализация не расширяет скоуп без обновления спеки.
 3. Коммиты желательно связывать с задачей: в сообщении указывайте номер, например: `Каркас навигации (#2)`.
 
+## Ветки, PR и релиз
+
+1. **Ветка от `main`:** для задачи создайте ветку вида `feature/<issue>-кратко` или `fix/<issue>-кратко` от актуального `main`, коммитьте туда.
+2. **Pull request:** изменения попадают в `main` только через **merge PR** на GitHub (после ревью при необходимости).
+3. **Тег релиза:** аннотированный тег `v*` (совпадает с **`AppMetadata.marketingVersion`**) ставится **после** merge в `main`, когда ветка уже влита — push тега запускает workflow релиза (артефакты на GitHub Releases).
+
+Прямой push смысловых изменений в `main` без PR не используем.
+
 ## Публикация релиза (для сопровождающих)
 
+Убедитесь, что нужные коммиты уже **в `main` после merge PR**.
+
 1. Обновите **`AppMetadata.marketingVersion`** в `Sources/CleanerCore/AppMetadata.swift` и зафиксируйте изменения в **`CHANGELOG.md`**.
-2. Локально проверьте упаковку: `./scripts/package-macos-app.sh` — в `.build/` появятся **`MacosStorageCleaner-macos.zip`** (стабильное имя для ссылки *latest/download* в README) и **`MacosStorageCleaner-<версия>-macos.zip`**.
+2. Локально проверьте упаковку на **macOS**: `./scripts/package-macos-app.sh` (нужны `packaging/AppIconSource.png`, `sips`, `iconutil`, `codesign`) — в `.build/` появятся **`MacosStorageCleaner-macos.zip`** (стабильное имя для ссылки *latest/download* в README) и **`MacosStorageCleaner-<версия>-macos.zip`**.
 3. Создайте и отправьте **аннотированный** тег с префиксом `v`, совпадающий с маркетинговой версией, например:
    ```bash
-   git tag -a v0.1.0 -m "Релиз 0.1.0"
-   git push origin v0.1.0
+   git tag -a v0.1.1 -m "Релиз 0.1.1"
+   git push origin v0.1.1
    ```
-4. Workflow **[`.github/workflows/release.yml`](.github/workflows/release.yml)** соберёт релиз и прикрепит оба архива к [GitHub Releases](https://github.com/Miwist/macos-storage-cleaner/releases). Подписи Apple Developer для открытого репозитория не используются; пользователям нужен первый запуск через **«Открыть»** в контекстном меню (см. README).
+4. Workflow **[`.github/workflows/release.yml`](.github/workflows/release.yml)** соберёт релиз и прикрепит оба архива к [GitHub Releases](https://github.com/Miwist/macos-storage-cleaner/releases). Используется только **ad hoc**-подпись бундла; Developer ID и нотаризация не задействованы. Пользователям нужен первый запуск через **«Открыть»** в контекстном меню; при сообщении о «повреждении» — см. README (`xattr`).
 
 ## Pull request
 
