@@ -6,6 +6,11 @@
 
 ### Добавлено
 
+- Каркас главного окна: `NavigationSplitView`, разделы «Сканирование», «Настройки», «О программе» с заглушками.
+- Раскладка `Sources/CleanerUI/AppShell/` и `Sources/CleanerUI/Features/<раздел>/`.
+
+### Ранее
+
 - Модульный Swift Package: `CleanerCore`, `CleanerUI`, исполняемый `CleanerApp`.
 - Базовая спецификация и правила для Cursor.
 - Документация для участников и шаблон CI.
