@@ -43,25 +43,62 @@ public struct ShallowDirectoryListingService: ShallowDirectoryListing, Sendable 
 
         for url in urls {
             do {
-                let values = try url.resourceValues(forKeys: [
+                let symlinkValues = try url.resourceValues(forKeys: [.isSymbolicLinkKey])
+                let isSymlink = symlinkValues.isSymbolicLink ?? false
+                let urlForSizeKeys = isSymlink ? url.resolvingSymlinksInPath() : url
+
+                let values = try urlForSizeKeys.resourceValues(forKeys: [
                     .isRegularFileKey,
                     .isDirectoryKey,
                     .isPackageKey,
                     .fileSizeKey,
+                    .totalFileAllocatedSizeKey,
+                    .fileAllocatedSizeKey,
                 ])
                 let isPackage = values.isPackage ?? false
                 let isDirectory = (values.isDirectory ?? false) || isPackage
                 let isRegular = values.isRegularFile ?? false
                 let itemPath = url.standardizedFileURL.path
 
+                let safety = PathSafetyClassifier.classify(path: itemPath)
                 if isDirectory {
-                    items.append(DirectoryListingItem(name: url.lastPathComponent, path: itemPath, isDirectory: true, sizeBytes: nil))
+                    var allocated =
+                        values.totalFileAllocatedSize.map { Int64($0) }
+                        ?? values.fileAllocatedSize.map { Int64($0) }
+                    if allocated == nil {
+                        allocated = try? shallowImmediateChildrenSizeEstimate(at: urlForSizeKeys)
+                    }
+                    items.append(
+                        DirectoryListingItem(
+                            name: url.lastPathComponent,
+                            path: itemPath,
+                            isDirectory: true,
+                            sizeBytes: allocated,
+                            safetyKind: safety
+                        )
+                    )
                 } else if isRegular {
                     let size = Int64(values.fileSize ?? 0)
-                    items.append(DirectoryListingItem(name: url.lastPathComponent, path: itemPath, isDirectory: false, sizeBytes: size))
+                    items.append(
+                        DirectoryListingItem(
+                            name: url.lastPathComponent,
+                            path: itemPath,
+                            isDirectory: false,
+                            sizeBytes: size,
+                            safetyKind: safety
+                        )
+                    )
                 } else {
                     // Симлинки и прочие: показываем строку без размера файла.
-                    items.append(DirectoryListingItem(name: url.lastPathComponent, path: itemPath, isDirectory: false, sizeBytes: nil))
+                    items.append(
+                        DirectoryListingItem(
+                            name: url.lastPathComponent,
+                            path: itemPath,
+                            isDirectory: false,
+                            sizeBytes: nil,
+                            safetyKind: safety
+                        )
+                    )
                 }
             } catch {
                 throw DirectoryListingError.enumerationFailed(
@@ -75,6 +112,44 @@ public struct ShallowDirectoryListingService: ShallowDirectoryListing, Sendable 
             if lhs.isDirectory != rhs.isDirectory { return lhs.isDirectory && !rhs.isDirectory }
             return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
         }
+    }
+
+    /// Сумма размеров прямых вложений (файлы по `fileSize`, папки по выделенному размеру, если есть) — только если вложений немного.
+    nonisolated private static func shallowImmediateChildrenSizeEstimate(at directory: URL) throws -> Int64? {
+        let urls = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [
+                .isRegularFileKey,
+                .isDirectoryKey,
+                .isPackageKey,
+                .fileSizeKey,
+                .totalFileAllocatedSizeKey,
+                .fileAllocatedSizeKey,
+            ],
+            options: [.skipsPackageDescendants, .skipsHiddenFiles]
+        )
+        guard urls.count <= 500 else { return nil }
+
+        var sum: Int64 = 0
+        for child in urls {
+            let v = try child.resourceValues(forKeys: [
+                .isRegularFileKey,
+                .isDirectoryKey,
+                .isPackageKey,
+                .fileSizeKey,
+                .totalFileAllocatedSizeKey,
+                .fileAllocatedSizeKey,
+            ])
+            let isPkg = v.isPackage ?? false
+            let isDir = (v.isDirectory ?? false) || isPkg
+            if v.isRegularFile == true {
+                sum += Int64(v.fileSize ?? 0)
+            } else if isDir {
+                let part = v.totalFileAllocatedSize.map { Int64($0) } ?? v.fileAllocatedSize.map { Int64($0) } ?? 0
+                sum += part
+            }
+        }
+        return sum > 0 ? sum : nil
     }
 
     nonisolated private static func mapEnumerationError(directoryPath: String, error: Error) -> DirectoryListingError {
