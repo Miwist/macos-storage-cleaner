@@ -3,6 +3,7 @@ import SwiftUI
 /// Разделы боковой панели главного окна. Новые экраны — новый кейс и заглушка в `Features/`.
 enum SidebarSection: String, CaseIterable, Identifiable, Hashable {
     case scan
+    case quickClean
     case settings
     case about
 
@@ -10,7 +11,8 @@ enum SidebarSection: String, CaseIterable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .scan: "Сканирование"
+        case .scan: "Память"
+        case .quickClean: "Быстрая очистка"
         case .settings: "Настройки"
         case .about: "О программе"
         }
@@ -18,7 +20,8 @@ enum SidebarSection: String, CaseIterable, Identifiable, Hashable {
 
     var systemImage: String {
         switch self {
-        case .scan: "externaldrive"
+        case .scan: "chart.pie.fill"
+        case .quickClean: "trash.circle"
         case .settings: "gearshape"
         case .about: "info.circle"
         }

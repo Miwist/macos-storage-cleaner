@@ -10,12 +10,21 @@ public struct DirectoryListingItem: Identifiable, Sendable, Equatable {
     public let isDirectory: Bool
     /// Для файлов — размер в байтах; для папок без рекурсивного обхода — `nil` (в UI показывается «—»).
     public let sizeBytes: Int64?
+    /// Эвристическая метка для подсветки в UI (см. `PathSafetyClassifier`).
+    public let safetyKind: StoragePathSafetyKind
 
-    public init(name: String, path: String, isDirectory: Bool, sizeBytes: Int64?) {
+    public init(
+        name: String,
+        path: String,
+        isDirectory: Bool,
+        sizeBytes: Int64?,
+        safetyKind: StoragePathSafetyKind = .neutral
+    ) {
         self.name = name
         self.path = path
         self.isDirectory = isDirectory
         self.sizeBytes = sizeBytes
+        self.safetyKind = safetyKind
         self.id = path
     }
 
@@ -25,7 +34,9 @@ public struct DirectoryListingItem: Identifiable, Sendable, Equatable {
     }
 
     public func sizeDisplayString() -> String {
-        if isDirectory { return "—" }
+        if isDirectory {
+            return ByteSizeFormatting.string(forOptionalByteCount: sizeBytes, missing: "оценка недоступна")
+        }
         guard let bytes = sizeBytes else { return "—" }
         return ByteSizeFormatting.string(forByteCount: bytes)
     }

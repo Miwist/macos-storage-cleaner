@@ -6,6 +6,17 @@
 2. Реализация не расширяет скоуп без обновления спеки.
 3. Коммиты желательно связывать с задачей: в сообщении указывайте номер, например: `Каркас навигации (#2)`.
 
+## Публикация релиза (для сопровождающих)
+
+1. Обновите **`AppMetadata.marketingVersion`** в `Sources/CleanerCore/AppMetadata.swift` и зафиксируйте изменения в **`CHANGELOG.md`**.
+2. Локально проверьте упаковку: `./scripts/package-macos-app.sh` — в `.build/` появятся **`MacosStorageCleaner-macos.zip`** (стабильное имя для ссылки *latest/download* в README) и **`MacosStorageCleaner-<версия>-macos.zip`**.
+3. Создайте и отправьте **аннотированный** тег с префиксом `v`, совпадающий с маркетинговой версией, например:
+   ```bash
+   git tag -a v0.1.0 -m "Релиз 0.1.0"
+   git push origin v0.1.0
+   ```
+4. Workflow **[`.github/workflows/release.yml`](.github/workflows/release.yml)** соберёт релиз и прикрепит оба архива к [GitHub Releases](https://github.com/Miwist/macos-storage-cleaner/releases). Подписи Apple Developer для открытого репозитория не используются; пользователям нужен первый запуск через **«Открыть»** в контекстном меню (см. README).
+
 ## Pull request
 
 - Один PR — одна тема.
