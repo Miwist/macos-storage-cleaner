@@ -1,5 +1,6 @@
 # Build
 .build/
+.swiftpm/
 .swiftpm/xcode/
 .swiftpm/configuration/
 *.swiftpm/
