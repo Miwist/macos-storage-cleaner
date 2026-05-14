@@ -1,7 +1,6 @@
 import Foundation
 
-/// Ошибки поверхностного листинга каталога (пользовательские тексты на русском).
-/// В ассоциированных значениях используется `String` (путь), а не `URL`, чтобы тип был `Sendable` на всех версиях Swift в CI.
+/// Ошибки поверхностного листинга каталога (тексты для пользователя на русском, без лишнего жаргона).
 public enum DirectoryListingError: Error, LocalizedError, Sendable {
     case notDirectory(path: String)
     case accessDenied(path: String)
@@ -9,12 +8,12 @@ public enum DirectoryListingError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .notDirectory(let path):
-            "Выбранный объект не является папкой: \(path)"
-        case .accessDenied(let path):
-            "Нет доступа к содержимому папки. Для каталогов вроде «Документы» или «Загрузки» обычно достаточно прав пользователя; для системных путей может понадобиться «Полный доступ к диску» в настройках macOS.\n\(path)"
-        case .enumerationFailed(let path, let reason):
-            "Не удалось прочитать содержимое папки.\n\(reason)\n\(path)"
+        case .notDirectory:
+            "Это не папка, а другой тип файла. Выберите обычную папку."
+        case .accessDenied:
+            "macOS не дал открыть эту папку. Чаще всего помогает добавить приложение в список «Полный доступ к диску» в разделе «Конфиденциальность и безопасность» системных настроек."
+        case .enumerationFailed:
+            "Не удалось прочитать содержимое папки. Попробуйте другую папку или повторите позже."
         }
     }
 }
