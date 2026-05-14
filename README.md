@@ -18,6 +18,13 @@
 - **CleanerUI** — представления SwiftUI.
 - **CleanerApp** — точка входа `@main`, сборка исполняемого продукта **MacosStorageCleaner**.
 
+### Структура UI в коде
+
+В модуле `CleanerUI` (см. `docs/СПЕЦИФИКАЦИЯ.md`, п. 3.1):
+
+- `AppShell/` — главное окно и навигация (`NavigationSplitView`).
+- `Features/<Раздел>/` — экраны и заглушки по разделам (например `Features/Scan/`).
+
 ## Требования
 
 - macOS **14** или новее  
