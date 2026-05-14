@@ -16,7 +16,7 @@ struct MainNavigationShell: View {
             Group {
                 switch selection {
                 case .scan:
-                    ScanPlaceholderView()
+                    ScanView()
                 case .settings:
                     SettingsPlaceholderView()
                 case .about:
