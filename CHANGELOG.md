@@ -6,8 +6,12 @@
 
 ### Добавлено
 
-- Каркас главного окна: `NavigationSplitView`, разделы «Сканирование», «Настройки», «О программе» с заглушками.
-- Раскладка `Sources/CleanerUI/AppShell/` и `Sources/CleanerUI/Features/<раздел>/`.
+- Раздел «Сканирование»: выбор папки через `NSOpenPanel`, таблица прямых вложений, размеры файлов, фоновое чтение (`ShallowDirectoryListingService`).
+- Модели и ошибки листинга в `CleanerCore` (`DirectoryListingItem`, `DirectoryListingError`, `ByteSizeFormatting`).
+
+### Исправлено
+
+- CI: `Sendable`-модели листинга хранят путь как `String` (совместимость со Swift 5.9 на `macos-14`); workflow на `macos-15` и `actions/checkout@v5`.
 
 ### Ранее
 

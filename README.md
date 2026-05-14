@@ -23,7 +23,7 @@
 В модуле `CleanerUI` (см. `docs/СПЕЦИФИКАЦИЯ.md`, п. 3.1):
 
 - `AppShell/` — главное окно и навигация (`NavigationSplitView`).
-- `Features/<Раздел>/` — экраны и заглушки по разделам (например `Features/Scan/`).
+- `Features/<Раздел>/` — экраны и заглушки по разделам; для сканирования см. `Features/Scan/` (`ScanView`, `NSOpenPanel` в `FolderChooser`, модель `ScanFolderViewModel`).
 
 ## Требования
 
