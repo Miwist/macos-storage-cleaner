@@ -2,6 +2,12 @@ import CleanerCore
 import SwiftUI
 
 struct SettingsView: View {
+    @AppStorage("showPathSafetyHighlights") private var showPathSafetyHighlights = true
+    @AppStorage("autoAnalyzeStorageOnOpen") private var autoAnalyzeStorageOnOpen = true
+    @AppStorage("showTechnicalPaths") private var showTechnicalPaths = false
+    @AppStorage("colorfulInterface") private var colorfulInterface = true
+    @AppStorage("confirmBeforeMoveToTrash") private var confirmBeforeMoveToTrash = true
+
     var body: some View {
         Form {
             Section("О приложении") {
@@ -9,17 +15,45 @@ struct SettingsView: View {
                 LabeledContent("Версия", value: AppMetadata.marketingVersion)
             }
 
-            Section("Доступ к файлам") {
-                Text(
-                    "Для чтения некоторых каталогов (например, чужие защищённые пути) macOS может запретить доступ. При необходимости добавьте приложение в «Системные настройки» → «Конфиденциальность и безопасность» → «Полный доступ к диску». Этот MVP не запрашивает разрешение автоматически."
+            Section("Память и корзина") {
+                Toggle(
+                    "Спрашивать подтверждение перед «Переместить в корзину» в разделе «Память»",
+                    isOn: $confirmBeforeMoveToTrash
                 )
-                .font(.callout)
-                .foregroundStyle(.secondary)
+                Text("Если выключить, выбранный файл или папка сразу отправляются в корзину Finder из контекстного меню таблицы.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
             }
 
-            Section("Сканирование") {
+            Section("Анализ памяти") {
+                Toggle("Считать основные папки при открытии раздела «Память»", isOn: $autoAnalyzeStorageOnOpen)
                 Text(
-                    "Выберите папку в разделе «Сканирование». Навигация внутрь и кнопка «Назад» работают только внутри выбранного корня; размеры файлов на текущем уровне считаются в модуле CleanerCore."
+                    "Мы оцениваем загрузки, документы, кэши и другие типичные места. Это может занять от нескольких секунд до пары минут. Если выключить автоматический подсчёт, при открытии раздела покажем последний сохранённый снимок; заново посчитать можно кнопкой «Обновить оценку»."
+                )
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Подсказки по файлам") {
+                Toggle("Показывать подсказки «часто можно удалить» / «лучше не трогать»", isOn: $showPathSafetyHighlights)
+                Text("Это оценка, а не гарантия. Перед удалением всё равно смотрите, что внутри папки.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Внешний вид") {
+                Toggle("Больше цвета и мягкий фон", isOn: $colorfulInterface)
+                Toggle("Показывать служебные пути macOS мелким шрифтом", isOn: $showTechnicalPaths)
+                Text("Служебные пути полезны, если вы привыкли к терминалу; обычно они не нужны.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Доступ macOS") {
+                Text(
+                    "Если какая-то папка не открывается, откройте «Системные настройки» → «Конфиденциальность и безопасность» → «Полный доступ к диску» и добавьте это приложение. Мы не запрашиваем доступ сами — так спокойнее и прозрачнее."
                 )
                 .font(.callout)
                 .foregroundStyle(.secondary)

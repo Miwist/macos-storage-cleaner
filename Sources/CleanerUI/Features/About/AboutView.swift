@@ -14,22 +14,23 @@ struct AboutView: View {
 
             Group {
                 LabeledContent("Версия", value: AppMetadata.marketingVersion)
-                LabeledContent("Исполняемый модуль", value: CleanerCore.bundleName)
-                LabeledContent("Лицензия", value: "\(AppMetadata.licenseName) (см. файл LICENSE в репозитории)")
+                LabeledContent("Лицензия", value: AppMetadata.licenseName)
             }
             .font(.body)
 
             if let url = repositoryURL {
                 Link(destination: url) {
-                    Label("Репозиторий на GitHub", systemImage: "link")
+                    Label("Открыть страницу проекта", systemImage: "link")
                 }
                 .buttonStyle(.borderedProminent)
             }
 
-            Text("Приложение помогает просматривать занятое место в выбранных папках. Удаление и глубокий анализ системы могут появиться в следующих версиях.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: 520, alignment: .leading)
+            Text(
+                "Приложение помогает понять, что занимает место на диске, показывает основные разделы и даёт аккуратные подсказки. Удаление выполняется только вашими действиями."
+            )
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: 520, alignment: .leading)
 
             Spacer(minLength: 0)
         }

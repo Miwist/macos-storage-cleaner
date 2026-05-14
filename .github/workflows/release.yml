@@ -1,0 +1,29 @@
+name: Релиз
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Упаковка .app и ZIP
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: ./scripts/package-macos-app.sh
+
+      - name: Публикация на GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            .build/MacosStorageCleaner-macos.zip
+            .build/MacosStorageCleaner-*-macos.zip
+          generate_release_notes: true
