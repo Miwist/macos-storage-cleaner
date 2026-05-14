@@ -1,0 +1,37 @@
+# Build
+.build/
+.swiftpm/xcode/
+.swiftpm/configuration/
+*.swiftpm/
+
+# Xcode (если появятся проекты workspace)
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+*.xcworkspace/xcuserdata/
+DerivedData/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.dmg
+*.pkg
+
+# Certificates / keys
+*.p12
+*.mobileprovision
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs & temp
+*.log
+tmp/
+temp/
+
+# Optional tooling
+.netrc
