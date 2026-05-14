@@ -18,7 +18,7 @@
 
 Новый экран в интерфейсе: папка `Sources/CleanerUI/Features/<ИмяРаздела>/`, при необходимости — новый пункт в `AppShell/SidebarSection.swift` и ветка в `MainNavigationShell.swift`.
 
-Поверхностный листинг каталогов и форматирование размеров — в **`CleanerCore`** (`DirectoryListing/`, `Formatting/`), без `import SwiftUI`.
+Поверхностный листинг каталогов и форматирование размеров — в **`CleanerCore`** (`DirectoryListing/`, `Formatting/`), без `import SwiftUI`. Проверка, что путь остаётся внутри выбранного корня при навигации — **`FolderPathScope`** в Core.
 
 ## Язык
 

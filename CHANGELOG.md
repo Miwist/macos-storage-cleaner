@@ -6,15 +6,11 @@
 
 ### Добавлено
 
-- Раздел «Сканирование»: выбор папки через `NSOpenPanel`, таблица прямых вложений, размеры файлов, фоновое чтение (`ShallowDirectoryListingService`).
-- Модели и ошибки листинга в `CleanerCore` (`DirectoryListingItem`, `DirectoryListingError`, `ByteSizeFormatting`).
-
-### Исправлено
-
-- CI: `Sendable`-модели листинга хранят путь как `String` (совместимость со Swift 5.9 на `macos-14`); workflow на `macos-15` и `actions/checkout@v5`.
+- Навигация внутри выбранного корня: стек каталогов, «Назад», двойной щелчок и «Открыть» для папок, полный путь и подпись корня.
+- В `CleanerCore`: `FolderPathScope` (границы навигации), `AppMetadata` (версия MVP, ссылка на репозиторий, лицензия).
+- Экраны **«О программе»** (`AboutView`) и **«Настройки»** (`SettingsView`) с осмысленным MVP-контентом.
 
 ### Ранее
 
-- Модульный Swift Package: `CleanerCore`, `CleanerUI`, исполняемый `CleanerApp`.
-- Базовая спецификация и правила для Cursor.
-- Документация для участников и шаблон CI.
+- Раздел «Сканирование» (задача #3): `NSOpenPanel`, таблица первого уровня, `ShallowDirectoryListingService`, исправления CI.
+- Модульный Swift Package, спека, правила Cursor, документация для участников.

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ScanView: View {
     @State private var model = ScanFolderViewModel()
+    @State private var selectedItemIDs = Set<String>()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -24,41 +25,86 @@ struct ScanView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 12) {
-            Button("Выбрать папку…") {
-                model.pickFolder()
-            }
-            .keyboardShortcut("o", modifiers: [.command])
-
-            if model.selectedFolderURL != nil {
-                Button {
-                    Task { await model.reloadListing() }
-                } label: {
-                    Label("Обновить", systemImage: "arrow.clockwise")
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                Button("Выбрать папку…") {
+                    selectedItemIDs = []
+                    model.pickFolder()
                 }
-                .disabled(model.isLoading)
+                .keyboardShortcut("o", modifiers: [.command])
+
+                Button {
+                    model.goBack()
+                    selectedItemIDs = []
+                } label: {
+                    Label("Назад", systemImage: "chevron.backward")
+                }
+                .disabled(!model.canGoBack || model.isLoading)
+                .help("Вернуться на уровень выше (до выбранного корня)")
+
+                Button("Открыть") {
+                    openSelectedFolder()
+                }
+                .disabled(!canOpenSelection || model.isLoading)
+                .keyboardShortcut(.return, modifiers: [.command])
+
+                if model.selectedFolderURL != nil {
+                    Button {
+                        Task { await model.reloadListing() }
+                    } label: {
+                        Label("Обновить", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(model.isLoading)
+                }
+
+                if model.isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Чтение…")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+
+                Spacer(minLength: 0)
             }
 
-            if model.isLoading {
-                ProgressView()
-                    .controlSize(.small)
-                Text("Чтение…")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-            }
-
-            Spacer(minLength: 0)
-
-            if let folder = model.selectedFolderURL {
-                Text(folder.path)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .truncationMode(.middle)
-                    .textSelection(.enabled)
+            if let current = model.selectedFolderURL {
+                VStack(alignment: .leading, spacing: 4) {
+                    if let root = model.rootFolderURL, model.canGoBack {
+                        Text("Корень: \(root.path)")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(2)
+                            .truncationMode(.middle)
+                            .textSelection(.enabled)
+                    }
+                    Text(current.path)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+                }
             }
         }
         .padding(12)
+    }
+
+    private var canOpenSelection: Bool {
+        guard selectedItemIDs.count == 1,
+              let id = selectedItemIDs.first,
+              let item = model.items.first(where: { $0.id == id })
+        else { return false }
+        return item.isDirectory
+    }
+
+    private func openSelectedFolder() {
+        guard let id = selectedItemIDs.first,
+              let item = model.items.first(where: { $0.id == id }),
+              item.isDirectory
+        else { return }
+        selectedItemIDs = []
+        model.openDirectory(item)
     }
 
     @ViewBuilder
@@ -67,7 +113,7 @@ struct ScanView: View {
             ContentUnavailableView(
                 "Папка не выбрана",
                 systemImage: "folder",
-                description: Text("Нажмите «Выбрать папку…», чтобы показать элементы первого уровня и их размеры.")
+                description: Text("Выберите корневую папку, затем открывайте вложенные каталоги двойным щелчком по имени или кнопкой «Открыть».")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if model.isLoading && model.items.isEmpty {
@@ -77,20 +123,27 @@ struct ScanView: View {
             ContentUnavailableView(
                 "Не удалось прочитать папку",
                 systemImage: "exclamationmark.triangle",
-                description: Text("См. сообщение выше. При нехватке прав проверьте настройки конфиденциальности macOS.")
+                description: Text("См. сообщение выше.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if !model.isLoading && model.items.isEmpty && model.errorMessage == nil {
             ContentUnavailableView(
                 "Пусто",
                 systemImage: "doc",
-                description: Text("В этой папке нет элементов (первый уровень).")
+                description: Text("В этой папке нет элементов.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            Table(model.items) {
+            Table(model.items, selection: $selectedItemIDs) {
                 TableColumn("Имя") { item in
                     Label(item.name, systemImage: item.isDirectory ? "folder.fill" : "doc")
+                        .contentShape(Rectangle())
+                        .onTapGesture(count: 2) {
+                            if item.isDirectory {
+                                selectedItemIDs = []
+                                model.openDirectory(item)
+                            }
+                        }
                 }
                 .width(min: 180, ideal: 280)
                 TableColumn("Размер") { item in
