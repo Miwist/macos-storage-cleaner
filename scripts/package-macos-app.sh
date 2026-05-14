@@ -10,11 +10,27 @@ if ! command -v swift &>/dev/null; then
   exit 1
 fi
 
+if ! command -v sips &>/dev/null || ! command -v iconutil &>/dev/null; then
+  echo "Нужны утилиты sips и iconutil (macOS)." >&2
+  exit 1
+fi
+
+if ! command -v codesign &>/dev/null; then
+  echo "codesign не найден (ожидается macOS)." >&2
+  exit 1
+fi
+
 MARKETING_VERSION="${MARKETING_VERSION:-$(
   grep -E 'marketingVersion = "' Sources/CleanerCore/AppMetadata.swift | head -1 | sed 's/.*"\([^"]*\)".*/\1/'
 )}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 BUNDLE_ID="${BUNDLE_ID:-com.github.miwist.MacosStorageCleaner}"
+
+ICON_SOURCE="${ROOT}/packaging/AppIconSource.png"
+if [[ ! -f "$ICON_SOURCE" ]]; then
+  echo "Нет исходника иконки: $ICON_SOURCE" >&2
+  exit 1
+fi
 
 swift build -c release
 
@@ -27,11 +43,26 @@ fi
 APP_NAME="MacosStorageCleaner.app"
 STAGE="${ROOT}/.build/PackageStaging"
 APP_PATH="${STAGE}/${APP_NAME}"
+ICONSET="${STAGE}/AppIcon.iconset"
 
 rm -rf "$STAGE"
-mkdir -p "${APP_PATH}/Contents/MacOS"
+mkdir -p "${APP_PATH}/Contents/MacOS" "${APP_PATH}/Contents/Resources"
 cp "$BIN" "${APP_PATH}/Contents/MacOS/MacosStorageCleaner"
 chmod +x "${APP_PATH}/Contents/MacOS/MacosStorageCleaner"
+
+mkdir -p "$ICONSET"
+sips -z 16 16 "$ICON_SOURCE" --out "${ICONSET}/icon_16x16.png" &>/dev/null
+sips -z 32 32 "$ICON_SOURCE" --out "${ICONSET}/icon_16x16@2x.png" &>/dev/null
+sips -z 32 32 "$ICON_SOURCE" --out "${ICONSET}/icon_32x32.png" &>/dev/null
+sips -z 64 64 "$ICON_SOURCE" --out "${ICONSET}/icon_32x32@2x.png" &>/dev/null
+sips -z 128 128 "$ICON_SOURCE" --out "${ICONSET}/icon_128x128.png" &>/dev/null
+sips -z 256 256 "$ICON_SOURCE" --out "${ICONSET}/icon_128x128@2x.png" &>/dev/null
+sips -z 256 256 "$ICON_SOURCE" --out "${ICONSET}/icon_256x256.png" &>/dev/null
+sips -z 512 512 "$ICON_SOURCE" --out "${ICONSET}/icon_256x256@2x.png" &>/dev/null
+sips -z 512 512 "$ICON_SOURCE" --out "${ICONSET}/icon_512x512.png" &>/dev/null
+sips -z 1024 1024 "$ICON_SOURCE" --out "${ICONSET}/icon_512x512@2x.png" &>/dev/null
+iconutil -c icns "$ICONSET" -o "${APP_PATH}/Contents/Resources/AppIcon.icns"
+rm -rf "$ICONSET"
 
 cat >"${APP_PATH}/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -42,6 +73,8 @@ cat >"${APP_PATH}/Contents/Info.plist" <<EOF
 	<string>ru</string>
 	<key>CFBundleExecutable</key>
 	<string>MacosStorageCleaner</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>${BUNDLE_ID}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -63,6 +96,8 @@ cat >"${APP_PATH}/Contents/Info.plist" <<EOF
 </dict>
 </plist>
 EOF
+
+codesign --force --deep --sign - "$APP_PATH"
 
 ARCHIVE_NAME="MacosStorageCleaner-${MARKETING_VERSION}-macos.zip"
 OUT_ZIP="${ROOT}/.build/${ARCHIVE_NAME}"
