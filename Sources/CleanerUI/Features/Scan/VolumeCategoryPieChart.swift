@@ -179,13 +179,13 @@ struct VolumeCategoryPieChart: View {
         if angle >= 2 * .pi { angle -= 2 * .pi }
 
         let total = Double(totalBytes)
-        var cursor: Double = 0
+        var sweepStart: Double = 0
         for slice in slices {
             let span = 2 * .pi * (Double(slice.bytes) / total)
-            if angle >= cursor && angle < cursor + span {
+            if angle >= sweepStart && angle < sweepStart + span {
                 return slice.id
             }
-            cursor += span
+            sweepStart += span
         }
         return slices.last?.id
     }
