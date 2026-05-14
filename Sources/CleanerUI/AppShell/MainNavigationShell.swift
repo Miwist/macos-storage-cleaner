@@ -18,9 +18,9 @@ struct MainNavigationShell: View {
                 case .scan:
                     ScanView()
                 case .settings:
-                    SettingsPlaceholderView()
+                    SettingsView()
                 case .about:
-                    AboutPlaceholderView()
+                    AboutView()
                 case .none:
                     ContentUnavailableView(
                         "Выберите раздел",
