@@ -41,7 +41,15 @@
 
 1. Откройте архив двойным щелчком (получите **`MacosStorageCleaner.app`**).
 2. Перетащите приложение в **«Программы»** или запускайте из окна архива.
-3. **Первый запуск:** приложение без подписи Apple — **ПКМ по иконке** → **«Открыть»** → подтвердить; либо **Системные настройки** → **Конфиденциальность и безопасность** → **«Всё равно открыть»** после первой попытки запуска.
+3. **Первый запуск:** сборка подписана **только ad hoc** (не Developer ID / не нотаризация Apple). Обычно достаточно **ПКМ по иконке** → **«Открыть»** → подтвердить; либо **Системные настройки** → **Конфиденциальность и безопасность** → **«Всё равно открыть»** после первой попытки запуска. Если система пишет, что приложение **«повреждено»** (часто из‑за карантина загрузки), в Терминале выполните:
+   ```bash
+   xattr -dr com.apple.quarantine /путь/к/MacosStorageCleaner.app
+   ```
+   **Как узнать путь:** перетащите **`MacosStorageCleaner.app`** из окна Finder в окно Терминала — курсор вставит полный путь (его можно дописать после `xattr …`); либо в Finder: **Option** + ПКМ по приложению → **«Копировать … как путь к имени»** (формулировка может отличаться в разных версиях macOS). Если не помните, где лежит файл, найдите кандидатов через Spotlight:
+   ```bash
+   mdfind "kMDItemFSName == 'MacosStorageCleaner.app'"
+   ```
+   Частые варианты: **`~/Downloads/MacosStorageCleaner.app`**, **`/Applications/MacosStorageCleaner.app`** — подставьте свой путь в команду `xattr` выше.
 
 Версия сборки указана внутри приложения (**«О программе»**). Альтернатива: открыть [страницу релизов](https://github.com/Miwist/macos-storage-cleaner/releases/latest) и вручную выбрать архив (там же может лежать копия с номером версии в имени файла).
 
@@ -64,13 +72,13 @@ swift build -c release
 
 Исполняемый файл: `$(swift build -c release --show-bin-path)/MacosStorageCleaner` (можно запускать напрямую или через `swift run -c release MacosStorageCleaner`).
 
-**Локальная упаковка в `.app` и ZIP** (как для GitHub Releases):
+**Локальная упаковка в `.app` и ZIP** (как для GitHub Releases; нужны **macOS**, `sips`, `iconutil`, `codesign`, исходник **`packaging/AppIconSource.png`**):
 
 ```bash
 ./scripts/package-macos-app.sh
 ```
 
-Архивы появятся в `.build/`: **`MacosStorageCleaner-macos.zip`** (то же содержимое, стабильное имя для ссылки *latest/download*) и **`MacosStorageCleaner-<версия>-macos.zip`**.
+Скрипт собирает **`AppIcon.icns`** в `Contents/Resources/`, дописывает `CFBundleIconFile` в `Info.plist` и выполняет **`codesign --force --deep --sign -`** для всего бандла. Архивы появятся в `.build/`: **`MacosStorageCleaner-macos.zip`** (то же содержимое, стабильное имя для ссылки *latest/download*) и **`MacosStorageCleaner-<версия>-macos.zip`**.
 
 Либо откройте `Package.swift` в Xcode и нажмите **Run** (схема **MacosStorageCleaner**).
 
