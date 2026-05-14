@@ -6,7 +6,7 @@
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![SPM](https://img.shields.io/badge/пакет-Swift%20Package%20Manager-F05138?logo=swift&logoColor=white)](Package.swift)
 
-**Нативное приложение для macOS:** просмотр занятого места и безопасное освобождение диска. Стек: **Swift**, **SwiftUI**, модульная структура (**Swift Package Manager**). Репозиторий: [github.com/Miwist/macos-storage-cleaner](https://github.com/Miwist/macos-storage-cleaner).
+**Нативное приложение для macOS:** просмотр занятого места в выбранной папке (вход в подкаталоги, «Назад» до корня, размеры файлов на текущем уровне) и дальнейшее развитие в сторону безопасного освобождения диска. Стек: **Swift**, **SwiftUI**, **Swift Package Manager**. Репозиторий: [github.com/Miwist/macos-storage-cleaner](https://github.com/Miwist/macos-storage-cleaner).
 
 ## Описание
 
@@ -23,7 +23,7 @@
 В модуле `CleanerUI` (см. `docs/СПЕЦИФИКАЦИЯ.md`, п. 3.1):
 
 - `AppShell/` — главное окно и навигация (`NavigationSplitView`).
-- `Features/<Раздел>/` — экраны и заглушки по разделам; для сканирования см. `Features/Scan/` (`ScanView`, `NSOpenPanel` в `FolderChooser`, модель `ScanFolderViewModel`).
+- `Features/<Раздел>/` — экраны по разделам; сканирование: `ScanView`, `ScanFolderViewModel`, `FolderChooser`; «О программе»: `AboutView`; «Настройки»: `SettingsView`.
 
 ## Требования
 
